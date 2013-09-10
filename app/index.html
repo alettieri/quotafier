@@ -1,0 +1,164 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <!-- build:css(.tmp) styles/main.css -->
+        <link rel="stylesheet" href="styles/foundation.css">
+        <link rel="stylesheet" href="styles/main.css">
+        <!-- endbuild -->
+        <!-- build:js scripts/vendor/modernizr.js -->
+        <script src="bower_components/modernizr/modernizr.js"></script>
+        <!-- endbuild -->
+    </head>
+    <body>
+
+
+        <script type="text/x-handlebars">
+            <div class="top-bar">
+                <ul class="title-area">
+                    <li class="name"><h1><a href="#">Projects</a></li>
+                </ul>
+            </div>
+            <div class="row">
+            {{outlet}}
+            </div>
+        </script>
+        
+
+        <script type="text/x-handlebars" data-template-name="projects/index">
+            <ul class="breadcrumbs">
+                <li class="current">{{#linkTo 'projects'}}Projects{{/linkTo}}</li>
+            </ul>
+            {{#linkTo 'projects.new' class='small button'}}New Project{{/linkTo}}
+            {{#each model}}
+                <h4>{{#linkTo 'project' this}}{{title}}{{/linkTo}}</h4>
+            {{/each}}
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="projects/new">
+            <ul class="breadcrumbs">
+                <li>{{#linkTo 'projects'}}Projects{{/linkTo}}</li>
+                <li class="current">{{#linkTo 'projects.new'}}New{{/linkTo}}</li>
+            </ul>
+            <form {{action 'addProject' on='submit'}}>
+                {{input type='text' value=title placeholder='Project Name' valueBinding='title'}}
+                {{textarea value=description placeholder='Project Description' valueBinding='description'}}
+                {{input type='submit' value='Add Project' class='small button'}}
+
+                {{#linkTo 'projects'}}Cancel{{/linkTo}}
+            </form>
+        </script>
+
+        <script type="text/x-handlebars" data-template-name="project">
+            {{partial 'project/view'}}
+        </script>
+
+        <script type='text/x-handlebars' data-template-name='project/_view'>
+            <ul class="breadcrumbs">
+                <li>{{#linkTo 'projects'}}Projects{{/linkTo}}</li>
+                <li class="current">{{#linkTo 'project' this}}{{title}}{{/linkTo}}</li>
+            </ul>
+            <section>
+                <header>
+                    {{#if titleEditable}}
+                        {{input value=title valueBinding='title' focus-out='saveTitle'}}
+                    {{else}}
+                        <h2 {{action 'editTitle' on='click'}}>{{title}}</h2>
+                    {{/if}}
+                </header>
+                
+                {{#if descriptionEditable}}
+                
+                    {{textarea value=description valueBinding='description' focus-out='saveDescription'}}
+                    <p>{{description}}</p>
+                {{else}}
+
+                <p {{action 'editDescription' on='click'}}>
+                    {{#if description}}
+                        {{description}}
+                    {{else}}
+                        Click to edit description
+                    {{/if}}
+                </p>
+                {{/if}}
+            </section>
+            {{partial 'project/details'}}
+        </script>
+
+        <script type='text/x-handlebars' data-template-name='project/_details'>
+            <h3>Details</h3>
+            <hr />
+            <form {{action 'addDetail' on='submit'}}>
+                {{input type="text" value=detailTitle placeholder='Add Detail'}}
+                {{input type="submit" value="Add Detail" class='small button'}}
+            </form>
+
+            {{#if detailEditable}}
+                {{render 'detail/edit'}}
+            {{/if}}
+            
+            <table class='small-12'>
+                <colgroup width="90%" />
+                <thead>
+                    <th>Detail</th>
+                    <th>Detail Hours</th>
+                </thead>
+                <tbody>
+                {{#each details itemController='detail'}}
+                    <tr>
+                        {{#if detailEditable}}
+                        <td>{{title}}</td>
+                        {{else}}
+                        <td {{action 'editDetail' on='doubleClick'}}>{{title}}</td>
+                        {{/if}}
+                        <td>{{detailHours}}</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </script>
+
+
+        <script type='text/x-handlebars' data-template-name='detail/edit'>
+            <form {{action 'updateDetail' on='submit'}}>
+               {{input type='text' value=title valueBinding='title'}}  
+               {{textarea value=description valueBinding='description'}}
+               {{input type='submit' value='Update' class="small button"}}  
+            </form>
+        </script>
+        
+
+       
+
+
+
+
+
+        <!-- build:js scripts/main.js -->
+        <script src="scripts/libs/jquery/jquery-1.9.1.js"></script>
+        <script src="scripts/libs/ember/handlebars-1.0.0.js"></script>
+        <script src="scripts/libs/ember/ember-1.0.0.js"></script>
+        <script src="scripts/libs/ember/ember-data.js"></script>
+
+        <script src="scripts/app.js"></script>
+
+        <script src="scripts/models/store.js"></script>
+        <script src="scripts/models/project.js"></script>
+        <script src="scripts/models/detail.js"></script>
+        <script src="scripts/models/detail-item.js"></script>
+        <script src="scripts/models/fixtures.js"></script>
+
+
+        
+
+        <!-- endbuild -->
+</body>
+</html>
