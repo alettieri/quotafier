@@ -89,6 +89,7 @@
                     {{/if}}
                 </p>
                 {{/if}}
+                <h4>Total Hours: {{projectHours}}</h4>
             </section>
             {{partial 'project/details'}}
         </script>
@@ -96,7 +97,7 @@
         <script type='text/x-handlebars' data-template-name='project/_details'>
             <h3>Details</h3>
             <hr />
-            <form {{action 'addDetail' on='submit'}}>
+            <form {{action 'addDetail' on='submit'}} {{bind-attr class=':panel hasDetails::no-details'}}>
                 {{input type="text" value=detailTitle placeholder='Add Detail'}}
                 {{input type="submit" value="Add Detail" class='small button'}}
             </form>
@@ -105,38 +106,75 @@
                 {{render 'detail/edit'}}
             {{/if}}
             
-            <table class='small-12'>
-                <colgroup width="90%" />
-                <thead>
-                    <th>Detail</th>
-                    <th>Detail Hours</th>
-                </thead>
-                <tbody>
-                {{#each details itemController='detail'}}
-                    <tr>
-                        {{#if detailEditable}}
-                        <td>{{title}}</td>
-                        {{else}}
-                        <td {{action 'editDetail' on='doubleClick'}}>{{title}}</td>
-                        {{/if}}
-                        <td>{{detailHours}}</td>
-                    </tr>
-                {{/each}}
-                </tbody>
-            </table>
+            {{#if details}}
+                {{partial 'details/table'}}
+            {{/if}}
         </script>
 
 
         <script type='text/x-handlebars' data-template-name='detail/edit'>
-            <form {{action 'updateDetail' on='submit'}}>
-               {{input type='text' value=title valueBinding='title'}}  
-               {{textarea value=description valueBinding='description'}}
-               {{input type='submit' value='Update' class="small button"}}  
-            </form>
+
+            <div class='panel'>
+                <h4>Edit</h4>
+                
+                {{input type='text' value=title valueBinding='title'}}  
+                {{textarea value=description valueBinding='description'}} 
+                <hr />
+                <form {{action 'addSubItem' on='submit'}}>
+                    {{input type='text' value=subTitle placeholder='Add Sub Item'}}
+                    {{input type='submit' value='Add Sub Item'}}
+                </form>
+                <ul class='detail-items'>
+                {{#each detailItems itemController='detailItem'}}
+                    <li>
+                    {{input type='text' value=title valueBinding='title'}}
+                    {{input type='number' value=hours valueBinding='hours'}}
+                    {{textarea value=notes valueBinding='notes'}}
+                    </li>
+                {{/each}}
+                </ul>
+                <hr />
+                <a href="#" {{action 'updateDetail' on='click'}} class='small button'>Update</a>
+                <a href="#" {{action 'deleteDetail' on='click'}}>Delete</a>
+            </div>
+
         </script>
         
 
-       
+        <script type='text/x-handlebars' data-template-name='details/_table'>
+        <table class='small-12'>
+            <colgroup width="90%" />
+            <thead>
+                <th>Detail</th>
+                <th>Detail Hours</th>
+            </thead>
+            <tbody>
+                {{#each details itemController='detail'}}
+                    <tr>
+                        {{#if detailEditable}}
+                        <td>
+                        {{else}}
+                        <td {{action 'editDetail' on='doubleClick'}}>
+                        {{/if}}
+                        {{title}}
+                        {{partial 'detail/items'}}
+                        </td>
+                        <td>{{detailHours}}</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        </script>
+
+        <script type='text/x-handlebars' data-template-name='detail/_items'>
+            {{#if detailItems}}
+                <ul class='detail-items'>
+                    {{#each detailItems}}
+                        <li>{{title}}</li>
+                    {{/each}}
+                </ul>
+            {{/if}}
+        </script>
 
 
 
@@ -147,6 +185,7 @@
         <script src="scripts/libs/ember/handlebars-1.0.0.js"></script>
         <script src="scripts/libs/ember/ember-1.0.0.js"></script>
         <script src="scripts/libs/ember/ember-data.js"></script>
+        <script src="scripts/libs/ember/localstorage_adapter.js"></script>
 
         <script src="scripts/app.js"></script>
 
@@ -154,7 +193,7 @@
         <script src="scripts/models/project.js"></script>
         <script src="scripts/models/detail.js"></script>
         <script src="scripts/models/detail-item.js"></script>
-        <script src="scripts/models/fixtures.js"></script>
+        <!--<script src="scripts/models/fixtures.js"></script>-->
 
 
         

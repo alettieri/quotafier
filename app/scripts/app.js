@@ -55,7 +55,7 @@ App.ProjectsNewRoute = Ember.Route.extend({
 App.ProjectRoute = Ember.Route.extend({
    
     model: function(params) {
-    
+        
         return this.store.find( 'project', params.project_id );
 
     }
@@ -119,6 +119,25 @@ App.ProjectController = Ember.ObjectController.extend({
             .set('detailEditable', false );
     },
 
+    hasDetails: function() {
+        var details = this.get('model').get('details');
+
+        return details ? details.get('length') > 0 : false;
+    
+    }.property('model.details.length'),
+
+
+    projectHours: function() {
+
+        return this.get('details').getEach('detailHours').reduce(function(accum, hour) {
+
+            return accum + hour;
+
+        }, 0);
+
+
+    }.property('details.@each.detailHours'),
+
     actions: {
         
 
@@ -141,6 +160,7 @@ App.ProjectController = Ember.ObjectController.extend({
         },
 
         addDetail: function() {
+
             var title = this.get('detailTitle'),
                 project = this.get('model'),
                 detail
@@ -151,15 +171,15 @@ App.ProjectController = Ember.ObjectController.extend({
 
             this.set('detailTitle', '' );
 
-            detail = this.store.createRecord('detail', { title: title, project: project } );
+            detail = this.store.createRecord('detail', { 'title': title, 'project': project } );
 
             detail.save().then(function(detail) {
-                project.get('details').insertAt(0, detail );
+                project.get('details').pushObject( detail );
+                project.save();
             });
 
             
         }
-
 
     }
 });
@@ -180,23 +200,72 @@ App.DetailEditController = Ember.ObjectController.extend({
 
             var detail = this.get('model'),
                 title = detail.get( 'title' ),
-                self = this
+                self = this,
+                _items = [],
+                detailItems
             ;
 
             function detailUpdated() {
                 self.get('controllers.project').resetDetailEdit();
-               
             }
+
+            detail.get('detailItems').forEach(function(item){
+                if( item.get('isDirty') ) {
+                    _items.push(item.set('detail', detail));
+                }
+            });
+
+            _items.invoke('save');
 
             if( detail.get('isDirty' ) ) {
                 
                 if( !title || !title.trim() ) return;
-                
+
                 detail.save().then(detailUpdated);
+
                 return;
             }
 
+
             detailUpdated();
+        },
+
+        deleteDetail: function() {
+
+            var detail = this.get('model'),
+                project = detail.get('project'),
+                projectController = this.get('controllers.project')
+            ;
+            
+            detail.deleteRecord();
+
+            detail.save().then(function(){
+                projectController.resetDetailEdit();    
+            });
+            
+            
+            
+        },
+
+        addSubItem: function() {
+            
+            var detail = this.get('model'),
+                title = this.get('subTitle'),
+                self = this,
+                subItem
+            ;
+            
+            if( !title || !title.trim() ) return;
+
+            subItem = this.store.createRecord( 'detailItem', { 'title': title, 'detail': detail } );
+
+            this.set('subTitle','');
+
+            subItem.save().then(function(detailItem) {
+                detail.get('detailItems').pushObject(detailItem);
+                detail.save();
+            });
+
         }
     }
 
@@ -207,19 +276,40 @@ App.DetailController = Ember.ObjectController.extend({
 
     needs: ['project'],
 
-    detailHours: function(){
-        
-        return this.get('detailItems').getEach('hours').reduce(function(accum,hour){
-            return accum + hour;
-        }, 0 );
-
-    }.property('detailItems.@each.hours'),
-
     actions: {
+
         editDetail: function() {
+            
+            var pCont = this.get('controllers.project'),
+                currDetail = pCont.get('currentDetail')
+            ;
+
+            if( currDetail && currDetail.get('isDirty') ) { 
+                
+                if( confirm( 'You made some changes to this detail, are you sure you want to edit another one?' ) ) {
+                    
+                    currDetail.rollback();
+                
+                } else {
+                
+                    return;
+                
+                }
+                
+            }
+               
             this.get('controllers.project').editDetail(this.get('model'));
+            
+
         }
+
     }
 });
 
+
+App.DetailItemController = Ember.ObjectController.extend({
+
+
+
+});
 
